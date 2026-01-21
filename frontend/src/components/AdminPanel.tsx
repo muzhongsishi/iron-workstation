@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Trash2, Plus, Server, User, Cpu, HardDrive, Monitor, LayoutGrid, Edit3, X, Save, CalendarPlus, CheckCircle, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, isBefore, isToday, startOfDay, parseISO, areIntervalsOverlapping } from 'date-fns';
+import { Trash2, Plus, Monitor, X, Check, Calendar as CalendarIcon, User, AlertCircle } from 'lucide-react';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isBefore, isSameMonth, startOfDay, addDays } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 
 interface Workstation {
     id: number;

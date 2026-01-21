@@ -65,7 +65,24 @@ def add_workstation(
     except Exception as e:
         print(f"Error adding workstation: {e}")
         return {"success": False, "message": f"Error: {str(e)}"}
+        return {"success": False, "message": f"Error: {str(e)}"}
 
+from backend.schemas import UserCreate
+
+@router.post("/admin/users/add")
+def add_user(req: UserCreate, session: Session = Depends(get_session)):
+    try:
+        exists = session.exec(select(User).where(User.name == req.name)).first()
+        if exists:
+            return {"success": False, "message": f"User {req.name} already exists"}
+        
+        user = User(name=req.name, grade=req.grade, email=req.email)
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return {"success": True, "message": f"Added user {req.name}", "user": user}
+    except Exception as e:
+        return {"success": False, "message": f"Error: {str(e)}"}
 @router.get("/admin/reservations/{ws_id}")
 def get_workstation_reservations(ws_id: int, session: Session = Depends(get_session)):
     today = date.today()

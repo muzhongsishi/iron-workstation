@@ -24,6 +24,11 @@ class AuthResponse(BaseModel):
     user: Optional[UserRead] = None
     token: Optional[str] = None # Simple Mock Token for now
 
+class UserCreate(BaseModel):
+    name: str
+    grade: str
+    email: Optional[str] = None
+
 class WorkstationRead(BaseModel):
     id: int
     name: str

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { api } from '../lib/api';
+import api from '../lib/api';
 import { User, Lock, ArrowRight, Mail, Settings } from 'lucide-react';
 
 interface UserGroup {

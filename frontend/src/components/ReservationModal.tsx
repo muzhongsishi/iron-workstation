@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
-import { api } from '../lib/api';
+import api from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isBefore, startOfDay, addDays, getDay } from 'date-fns';
 import { cn } from '../lib/utils';

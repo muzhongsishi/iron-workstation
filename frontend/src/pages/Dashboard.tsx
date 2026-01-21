@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { api } from '../lib/api';
+import api from '../lib/api';
 import { WorkstationCard } from '../components/WorkstationCard';
 import { ReservationModal } from '../components/ReservationModal';
 import AdminPanel from '../components/AdminPanel';

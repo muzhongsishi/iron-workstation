@@ -1,21 +1,28 @@
-# Use official Python runtime as a parent image
-FROM python:3.9-slim
+# Start from Python 3.9
+FROM python:3.9
 
-# Set the working directory to /app
-WORKDIR /app
+# Set up a new user named "user" with user ID 1000
+RUN useradd -m -u 1000 user
 
-# Copy the current directory contents into the container at /app
-COPY . .
+# Switch to the "user" user
+USER user
 
-# Install any needed packages specified in requirements.txt
-# If you don't have a requirements.txt, we install manually (demonstration)
-# Ideally, you should have one. Let's assume we need to generate one or install directly.
-# For now, we'll install dependencies directly for simplicity in this generated file, 
-# but best practice is COPY requirements.txt -> RUN pip install.
+# Set home to the user's home directory
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH
+
+# Set the working directory to the user's home directory
+WORKDIR $HOME/app
+
+# Copy the current directory contents into the container at $HOME/app setting the owner to the user
+COPY --chown=user . $HOME/app
+
+# Install requirements
+# Note: We are installing everything directly as before
 RUN pip install --no-cache-dir fastapi uvicorn[standard] sqlmodel python-multipart emails apscheduler requests
 
-# Make port 8000 available to the world outside this container
-EXPOSE 8000
+# Make port 7860 available to the world outside this container
+EXPOSE 7860
 
-# Run app.py when the container launches
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run with host 0.0.0.0 and port 7860 (Standard for Hugging Face Spaces)
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "7860"]

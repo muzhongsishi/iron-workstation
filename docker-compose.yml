@@ -12,7 +12,9 @@ services:
     volumes:
       # 持久化数据库和Markdown文件
       - ./backend/database.db:/app/backend/database.db
+      - ./backend/database.db:/app/backend/database.db
       - ./硬件信息.md:/app/硬件信息.md
+      - ./frontend/dist:/app/frontend/dist # 映射前端静态文件
       # 如果需要查看日志，可以映射logs目录
     environment:
       - SMTP_SERVER=smtp.qq.com

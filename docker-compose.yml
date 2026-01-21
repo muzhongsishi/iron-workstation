@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # 后端服务
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: iron-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # 持久化数据库和Markdown文件
+      - ./backend/database.db:/app/backend/database.db
+      - ./硬件信息.md:/app/硬件信息.md
+      # 如果需要查看日志，可以映射logs目录
+    environment:
+      - SMTP_SERVER=smtp.qq.com
+      - SMTP_PORT=465
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    restart: always
+  # 如果您也想在服务器上通过Docker部署前端（可选）
+  # 注意：通常建议前端走 CDN (如 Cloudflare Pages/Vercel) 速度更快
+  # 下面的配置仅供参考，如果启用，需要为前端创建 Dockerfile
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "80:80"

@@ -1,3 +1,13 @@
+---
+title: Iron Workstation
+emoji: 🚀
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+app_port: 7860
+---
+
 # 钢铁工作站预约系统 (Iron Workstation System)
 
 本系统旨在解决实验室工作站“占位冲突”和“闲置未知”的问题。核心逻辑是**基于预约时间表**来管理机器状态。

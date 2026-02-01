@@ -1,6 +1,15 @@
 from sqlmodel import SQLModel, create_engine, Session
 
-sqlite_file_name = "database.db"
+import os
+
+# Hugging Face Persistent Storage Check
+if os.path.exists("/data"):
+    sqlite_file_name = "/data/database.db"
+    print(f"Using Persistent Storage: {sqlite_file_name}")
+else:
+    sqlite_file_name = "database.db"
+    print(f"Using Local Storage: {sqlite_file_name}")
+
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 connect_args = {"check_same_thread": False}

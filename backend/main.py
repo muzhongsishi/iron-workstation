@@ -1,11 +1,29 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from .database import create_db_and_tables
+from .database import create_db_and_tables, engine
 from .scheduler import start_scheduler
+from sqlmodel import Session, select
+from .models import User
+from .scripts.seeds import import_users, import_workstations
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
+    
+    # Auto-Seed Logic: Check if DB is empty
+    with Session(engine) as session:
+        user_count = session.exec(select(User)).first()
+        if not user_count:
+             print("🌱 Database appears empty. Auto-seeding data...")
+             try:
+                 import_users()
+                 import_workstations()
+                 print("✅ Auto-seeding complete.")
+             except Exception as e:
+                 print(f"❌ Auto-seeding failed: {e}")
+        else:
+             print("✅ Database already initialized.")
+
     start_scheduler()
     yield
 

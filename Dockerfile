@@ -18,8 +18,8 @@ WORKDIR $HOME/app
 COPY --chown=user . $HOME/app
 
 # Install requirements
-# Note: We are installing everything directly as before
-RUN pip install --no-cache-dir fastapi uvicorn[standard] sqlmodel python-multipart emails apscheduler requests
+# Install requirements using the requirements.txt file
+RUN pip install --no-cache-dir --upgrade -r backend/requirements.txt
 
 # Make port 7860 available to the world outside this container
 EXPOSE 7860

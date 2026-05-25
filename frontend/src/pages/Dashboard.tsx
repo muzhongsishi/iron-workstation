@@ -236,7 +236,7 @@ export default function Dashboard() {
 
                                 <div className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-slate-950/40">
                                     <img
-                                        src="https://vgmvurrbwotenkpulqjh.supabase.co/storage/v1/object/public/assets/chuanchiloutupian.png"
+                                        src="/building.jpg"
                                         alt="船池大楼"
                                         className="w-full h-auto opacity-75"
                                     />

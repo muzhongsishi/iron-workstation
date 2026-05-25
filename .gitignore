@@ -10,7 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -55,3 +55,10 @@ Thumbs.db
 # Database
 *.sqlite3
 *.db
+
+# Ignored Binary Images
+frontend/public/building.png
+船池楼图片.png
+chuanchiloutupian.png
+
+

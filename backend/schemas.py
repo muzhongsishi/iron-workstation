@@ -8,6 +8,8 @@ class UserRead(BaseModel):
     grade: str
     has_pin: bool  # To tell frontend if strict login is needed or setup
     email: Optional[str] = None
+    contact_method: Optional[str] = None
+    seat_location: Optional[str] = None
 
 class LoginRequest(BaseModel):
     name: str
@@ -17,6 +19,8 @@ class SetupUserRequest(BaseModel):
     name: str
     pin: str
     email: str
+    contact_method: str
+    seat_location: str
 
 class AuthResponse(BaseModel):
     success: bool
@@ -40,6 +44,11 @@ class WorkstationRead(BaseModel):
     current_user_name: Optional[str] = None
     admin_name: Optional[str] = None
     core_count: Optional[str] = None
+    type: str = "workstation"
+    contact_method: Optional[str] = None
+    seat_location: Optional[str] = None
+    last_user_name: Optional[str] = None
+    last_contact_method: Optional[str] = None
     
 class ReservationCreate(BaseModel):
     workstation_id: int

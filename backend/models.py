@@ -7,6 +7,8 @@ class User(SQLModel, table=True):
     name: str = Field(index=True)
     grade: str = Field(index=True)  # Year/Group from Excel
     email: Optional[str] = None
+    contact_method: Optional[str] = None # Added for 2.0 communication
+    seat_location: Optional[str] = None  # Added for 2.0 communication
     hashed_pin: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.now)
 
@@ -16,6 +18,7 @@ class Workstation(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str  # Hostname or Display Name
     room: str = Field(index=True)
+    type: str = Field(default="workstation") # workstation, cluster, laptop
     
     # Hardware Specs
     cpu_info: Optional[str] = None

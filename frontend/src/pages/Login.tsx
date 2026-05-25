@@ -19,6 +19,8 @@ export default function Login() {
     const [selectedUser, setSelectedUser] = useState<string>('');
     const [pin, setPin] = useState('');
     const [email, setEmail] = useState('');
+    const [contactMethod, setContactMethod] = useState('');
+    const [seatLocation, setSeatLocation] = useState('');
     const [mode, setMode] = useState<'login' | 'setup'>('login');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -52,12 +54,12 @@ export default function Login() {
                 if (mode === 'login') {
                     await login(selectedUserInfo.name, pin);
                 } else {
-                    if (!email) {
-                        setError('首次设置必须填写邮箱 (First time setup requires an email)');
+                    if (!email || !contactMethod || !seatLocation) {
+                        setError('首次设置必须填写邮箱、微信和座位 (All fields are required for setup)');
                         setLoading(false);
                         return;
                     }
-                    await setup(selectedUserInfo.name, pin, email);
+                    await setup(selectedUserInfo.name, pin, email, contactMethod, seatLocation);
                 }
             }
         } catch (err: any) {
@@ -142,22 +144,53 @@ export default function Login() {
                             </div>
 
                             {mode === 'setup' && !isAdminLogin && (
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-blue-100 flex items-center gap-2">
-                                        <Mail size={16} /> 联系邮箱 (Email)
-                                    </label>
-                                    <input
-                                        type="email"
-                                        className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="your.email@example.com"
-                                        required
-                                    />
-                                    <p className="text-xs text-yellow-300/80 px-1">
-                                        * 首次必须填写，用于接收提醒
+                                <>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-blue-100 flex items-center gap-2">
+                                            <Mail size={16} /> 联系邮箱 (Email)
+                                        </label>
+                                        <input
+                                            type="email"
+                                            className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="your.email@example.com"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2 animate-in slide-in-from-top-2">
+                                        <label className="text-sm font-medium text-blue-100 flex items-center gap-2">
+                                            💬 联系微信 / 电话 (WeChat/Phone)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                            value={contactMethod}
+                                            onChange={(e) => setContactMethod(e.target.value)}
+                                            placeholder="微信号或手机号 (微信最佳)"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2 animate-in slide-in-from-top-2">
+                                        <label className="text-sm font-medium text-blue-100 flex items-center gap-2">
+                                            📍 常用物理工位/座位 (Seat)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                            value={seatLocation}
+                                            onChange={(e) => setSeatLocation(e.target.value)}
+                                            placeholder="例如：401东侧窗边、310门口"
+                                            required
+                                        />
+                                    </div>
+
+                                    <p className="text-xs text-yellow-300/80 px-1 mt-1">
+                                        * 首次绑定必须填齐，方便同学之间沟通协调设备
                                     </p>
-                                </div>
+                                </>
                             )}
 
                             {error && (

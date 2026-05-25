@@ -88,3 +88,33 @@ def renew_reservation(res_id: int, session: Session = Depends(get_session)):
     session.add(res)
     session.commit()
     return {"success": True, "message": "Reservation renewed"}
+
+@router.get("/reservations/history/{workstation_id}")
+def get_reservation_history(workstation_id: int, session: Session = Depends(get_session)):
+    """
+    Get the top 10 most recent reservations (active/completed) 
+    for a specific workstation to display in the UI history.
+    """
+    stmt = (
+        select(Reservation)
+        .where(
+            (Reservation.workstation_id == workstation_id) &
+            (Reservation.status == "active")
+        )
+        .order_by(Reservation.end_date.desc())
+        .limit(10)
+    )
+    results = session.exec(stmt).all()
+    
+    history = []
+    for res in results:
+        history.append({
+            "id": res.id,
+            "user_id": res.user_id,
+            "user_name": res.user.name,
+            "start_date": res.start_date.isoformat(),
+            "end_date": res.end_date.isoformat(),
+            "purpose": res.purpose or "No Purpose",
+            "is_past": res.end_date < date.today()
+        })
+    return history

@@ -11,7 +11,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     login: (name: string, pin: string) => Promise<void>;
-    setup: (name: string, pin: string, email: string) => Promise<void>;
+    setup: (name: string, pin: string, email: string, contactMethod: string, seatLocation: string) => Promise<void>;
     logout: () => void;
     isLoading: boolean;
 }
@@ -41,8 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const setup = async (name: string, pin: string, email: string) => {
-        const res = await api.post('/auth/setup', { name, pin, email });
+    const setup = async (name: string, pin: string, email: string, contactMethod: string, seatLocation: string) => {
+        const res = await api.post('/auth/setup', { 
+            name, 
+            pin, 
+            email, 
+            contact_method: contactMethod, 
+            seat_location: seatLocation 
+        });
         if (res.data.success) {
             setUser(res.data.user);
             localStorage.setItem('iron_user', JSON.stringify(res.data.user));

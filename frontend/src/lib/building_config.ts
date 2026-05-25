@@ -1,0 +1,48 @@
+export interface RoomConfig {
+    room: string;
+    top: number;
+    left: number;
+}
+
+export const ROOMS_CONFIG: RoomConfig[] = [
+    {
+        "room": "401",
+        "top": 25.41,
+        "left": 40.44
+    },
+    {
+        "room": "310",
+        "top": 18.35,
+        "left": 22.48
+    },
+    {
+        "room": "201",
+        "top": 59.7,
+        "left": 40.32
+    },
+    {
+        "room": "106",
+        "top": 58.29,
+        "left": 15.36
+    },
+    {
+        "room": "工程中心",
+        "top": 24.41,
+        "left": 85.28
+    },
+    {
+        "room": "集群小屋",
+        "top": 35.1,
+        "left": 77.82
+    },
+    {
+        "room": "109",
+        "top": 53.45,
+        "left": 10.28
+    },
+    {
+        "room": "113",
+        "top": 47.4,
+        "left": 5.08
+    }
+];

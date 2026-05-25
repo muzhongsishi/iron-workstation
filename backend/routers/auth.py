@@ -17,7 +17,15 @@ def login(req: LoginRequest, session: Session = Depends(get_session)):
         return AuthResponse(
             success=True, 
             message="Admin login successful", 
-            user=UserRead(id=0, name="admin", grade="Administrator", has_pin=True, email="admin@localhost"),
+            user=UserRead(
+                id=0, 
+                name="admin", 
+                grade="Administrator", 
+                has_pin=True, 
+                email="admin@localhost", 
+                contact_method="Admin WeChat", 
+                seat_location="Control Room"
+            ),
             token="admin-token"
         )
 
@@ -35,7 +43,15 @@ def login(req: LoginRequest, session: Session = Depends(get_session)):
     return AuthResponse(
         success=True, 
         message="Login successful", 
-        user=UserRead(id=user.id, name=user.name, grade=user.grade, has_pin=True, email=user.email),
+        user=UserRead(
+            id=user.id, 
+            name=user.name, 
+            grade=user.grade, 
+            has_pin=True, 
+            email=user.email,
+            contact_method=user.contact_method,
+            seat_location=user.seat_location
+        ),
         token=f"mock-token-{user.id}"
     )
 
@@ -50,6 +66,8 @@ def setup_user(req: SetupUserRequest, session: Session = Depends(get_session)):
     
     user.hashed_pin = hash_pin(req.pin)
     user.email = req.email
+    user.contact_method = req.contact_method
+    user.seat_location = req.seat_location
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -57,6 +75,14 @@ def setup_user(req: SetupUserRequest, session: Session = Depends(get_session)):
     return AuthResponse(
         success=True, 
         message="Setup successful", 
-        user=UserRead(id=user.id, name=user.name, grade=user.grade, has_pin=True, email=user.email),
+        user=UserRead(
+            id=user.id, 
+            name=user.name, 
+            grade=user.grade, 
+            has_pin=True, 
+            email=user.email,
+            contact_method=user.contact_method,
+            seat_location=user.seat_location
+        ),
         token=f"mock-token-{user.id}"
     )

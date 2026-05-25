@@ -58,21 +58,44 @@ def parse_workstation_block(block):
     info['name'] = "Unknown"
     info['room'] = "Unknown"
     
-    # Regex Patterns
-    
-    # Position/Location
-    room_match = re.search(r'(位置|地点)\s*[:：]?\s*(?P<val>.*)', full_text)
+    # Position/Location & Standardize Room Name
+    room_match = re.search(r'(位置|地点|地点：|补录)\s*[:：]?\s*(?P<val>.*)', full_text)
+    raw_room = ""
     if room_match:
-        info['room'] = room_match.group('val').strip()
+        raw_room = room_match.group('val').strip()
     else:
-        # Check for Cluster pattern
-        if "集群小屋" in full_text:
-            info['room'] = "集群小屋"
+        raw_room = lines[0] if lines else ""
+        
+    if "401" in raw_room or "401" in full_text:
+        info['room'] = "401"
+    elif "310" in raw_room or "310" in full_text:
+        info['room'] = "310"
+    elif "201" in raw_room or "201" in full_text:
+        info['room'] = "201"
+    elif "106" in raw_room or "106" in full_text:
+        info['room'] = "106"
+    elif "109" in raw_room or "109" in full_text:
+        info['room'] = "109"
+    elif "113" in raw_room or "113" in full_text:
+        info['room'] = "113"
+    elif "工程中心" in raw_room or "工程中心" in full_text:
+        info['room'] = "工程中心"
+    elif "集群" in raw_room or "集群" in full_text:
+        info['room'] = "集群小屋"
+    else:
+        info['room'] = "Unknown"
             
     # Admin/User
     admin_match = re.search(r'(管理员|负责人|使用人)\s*[:：]?\s*(?P<val>.*)', full_text)
     if admin_match:
-        info['admin_name'] = admin_match.group('val').strip()
+        # Extract name and clean any host suffix
+        val = admin_match.group('val').strip()
+        name_only_match = re.split(r'【主机名】', val)
+        info['admin_name'] = name_only_match[0].strip().replace(":", "").replace("：", "")
+    else:
+        # Fallback for 'lx' cluster which has non-standard admin
+        if "管理员：张少谦" in full_text:
+            info['admin_name'] = "张少谦"
 
     # Hostname (Standard)
     host_match = re.search(r'【主机名】\s*[:：]\s*(?P<val>.*)', full_text)
@@ -114,19 +137,17 @@ def parse_workstation_block(block):
 
     # Clean Name if it's empty or still unknown but we have room
     if info['name'] == "Unknown" and info['room'] != "Unknown":
-         # Maybe derive from admin?
          if 'admin_name' in info:
              info['name'] = f"{info['admin_name']}的工作站"
     
     # Specific fix for "lx" station which has irregular format
-    if "lianxiao@lx" in full_text:
+    if "lianxiao@lx" in full_text or "宵站" in full_text:
         info['name'] = "lx (宵站)"
-        if not info.get('cpu_info'):
-            info['cpu_info'] = "AMD EPYC 7T83 64-Core"
-        if not info.get('memory_gb'):
-            # The file text actually has empty Memory value for this one in some lines, but check if we can find it
-            pass
-            
+        info['room'] = "集群小屋"
+        info['admin_name'] = "张少谦"
+        info['cpu_info'] = "AMD EPYC 7T83 64-Core Processor"
+        info['memory_gb'] = 256 # 补充缺少的内存值以展示
+
     return info
 
 def import_workstations():
@@ -139,13 +160,8 @@ def import_workstations():
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Split by double newlines or similar delimiters to get blocks
-    # Looking at the file, entries seem separated by multiple newlines
-    blocks = re.split(r'\n\s*\n\s*\n', content) 
-    # Also try splitting by "位置" if blocks are not clean
-    if len(blocks) < 5:
-        # Fallback split strategy
-        blocks = re.split(r'\n(?=位置|地点|集群)', content)
+    # Precise chunk split by newline followed by X号
+    blocks = re.split(r'\n(?=\d+号)', content)
 
     with Session(engine) as session:
         existing_ws = session.exec(select(Workstation)).all()
@@ -167,13 +183,15 @@ def import_workstations():
             if name in existing_ids:
                 continue
                 
+            ws_type = "cluster" if "集群" in name else "workstation"
             ws = Workstation(
                 name=name,
                 room=info.get('room', 'Unknown'),
                 cpu_info=info.get('cpu_info'),
                 memory_gb=info.get('memory_gb'),
                 os_info=info.get('os_info'),
-                admin_name=info.get('admin_name')
+                admin_name=info.get('admin_name'),
+                type=ws_type
             )
             session.add(ws)
             count += 1
@@ -182,10 +200,31 @@ def import_workstations():
         session.commit()
         print(f"Imported {count} new workstations.")
 
+def import_laptops():
+    print("--- Importing Laptops ---")
+    laptops = [
+        {"name": "联想小新new", "room": "公用笔记本", "cpu_info": "Intel i7 笔记本处理器", "memory_gb": 16, "os_info": "Windows 11", "admin_name": "关豪", "type": "laptop"},
+        {"name": "联想小新old", "room": "公用笔记本", "cpu_info": "Intel i5 笔记本处理器", "memory_gb": 8, "os_info": "Windows 10", "admin_name": "admin", "type": "laptop"},
+        {"name": "厚dell", "room": "公用笔记本", "cpu_info": "Intel i5 笔记本处理器", "memory_gb": 16, "os_info": "Windows 10", "admin_name": "admin", "type": "laptop"},
+        {"name": "新Thinkpad-王志刚", "room": "公用笔记本", "cpu_info": "Intel i7 笔记本处理器", "memory_gb": 32, "os_info": "Windows 11", "admin_name": "王志刚", "type": "laptop"},
+        {"name": "小dell", "room": "公用笔记本", "cpu_info": "Intel i5 笔记本处理器", "memory_gb": 16, "os_info": "Windows 11", "admin_name": "admin", "type": "laptop"}
+    ]
+    with Session(engine) as session:
+        count = 0
+        for lp in laptops:
+            exists = session.exec(select(Workstation).where(Workstation.name == lp["name"])).first()
+            if not exists:
+                ws = Workstation(**lp)
+                session.add(ws)
+                count += 1
+        session.commit()
+        print(f"Imported {count} new laptops.")
+
 def main():
     create_db_and_tables()
     import_users()
     import_workstations()
+    import_laptops()
 
 if __name__ == "__main__":
     main()

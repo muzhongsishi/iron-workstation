@@ -8,3 +8,4 @@ pydantic-settings>=2.1.0
 python-multipart>=0.0.9
 pytest
 httpx
+psycopg2-binary>=2.9.0

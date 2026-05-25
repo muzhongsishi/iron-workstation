@@ -3,7 +3,7 @@ import { X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isBefore, startOfDay, addDays, getDay } from 'date-fns';
-import { cn } from '../lib/utils';
+import { cn, getUserColor } from '../lib/utils';
 import { zhCN } from 'date-fns/locale';
 
 interface Props {
@@ -35,23 +35,20 @@ export function ReservationModal({ workstation, onClose, onSuccess }: Props) {
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(false);
 
+    const [history, setHistory] = useState<any[]>([]);
+
     // Fetch when month changes
     useEffect(() => {
         setFetching(true);
-        // Fetch 40 days to cover surrounding (naive but works for prototype)
-        // Or fetch specifically for this month range
-        // Let's rely on the existing API (next 30 days) and adapt it, 
-        // BUT user wants Month Navigation. The existing API `get_workstation_availability` takes `days`.
-        // We should probably modify backend to accept start/end, but for now let's just fetch 60 days to cover more ground
-        // OR just use what we have. 
-        // Actually, "get_workstation_availability" calculates from TODAY. 
-        // If I look at next month, I need to fetch from today + X. 
-        // Let's assume the API returns enough data or we modify API.
-        // Ideally we should modify API. Let's modify the frontend to request `days=90` to cover 3 months.
         api.get(`/reservations/availability/${workstation.id}?days=90`)
             .then(res => setAvailability(res.data))
             .catch(console.error)
             .finally(() => setFetching(false));
+
+        // Fetch history
+        api.get(`/reservations/history/${workstation.id}`)
+            .then(res => setHistory(res.data))
+            .catch(console.error);
     }, [workstation.id]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -150,6 +147,38 @@ export function ReservationModal({ workstation, onClose, onSuccess }: Props) {
                                 <div className="text-[10px] text-white/40 mb-0.5">administrator</div>
                                 <div className="text-white/80">{workstation.admin_name || 'N/A'}</div>
                             </div>
+                        </div>
+
+                        {/* 📜 最近使用轨迹 (只读历史记录) */}
+                        <div className="space-y-2 pb-4 border-b border-white/10">
+                            <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider">最近使用轨迹 (History)</h3>
+                            {history.length === 0 ? (
+                                <div className="text-[10px] text-white/30 italic">暂无历史使用记录</div>
+                            ) : (
+                                <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1 scrollbar-hide">
+                                    {history.map(item => (
+                                        <div key={item.id} className="bg-white/5 border border-white/5 rounded-lg p-2 flex flex-col gap-1 text-[11px]">
+                                            <div className="flex justify-between items-center">
+                                                <span 
+                                                    className="font-bold px-1.5 py-0.5 rounded text-[9px] text-white" 
+                                                    style={{ backgroundColor: getUserColor(item.user_name) }}
+                                                >
+                                                    {item.user_name}
+                                                </span>
+                                                <span className="text-[9px] text-white/30 font-mono">
+                                                    {item.is_past ? "已结束" : "预约中"}
+                                                </span>
+                                            </div>
+                                            <div className="text-white/60 font-mono text-[9px]">
+                                                {item.start_date} 至 {item.end_date}
+                                            </div>
+                                            <div className="text-white/40 truncate" title={item.purpose}>
+                                                💬 {item.purpose}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         <div className="bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/10">

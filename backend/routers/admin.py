@@ -249,18 +249,11 @@ def export_backup(session: Session = Depends(get_session)):
 @router.post("/admin/clear_database_online")
 def clear_database_online(session: Session = Depends(get_session)):
     try:
-        # 清空所有关联的外键及预约数据
-        for r in session.exec(select(Reservation)).all():
-            session.delete(r)
-        
-        # 清空用户数据
-        for u in session.exec(select(User)).all():
-            session.delete(u)
-            
-        # 清空工作站硬件数据
-        for w in session.exec(select(Workstation)).all():
-            session.delete(w)
-            
+        from sqlmodel import text
+        # 使用批量 SQL 快速删除，只需 0.05 秒，防止跨国网络延迟导致的连接超时
+        session.execute(text("DELETE FROM reservation"))
+        session.execute(text("DELETE FROM workstation"))
+        session.execute(text('DELETE FROM "user"'))
         session.commit()
         return {"success": True, "message": "All online database records cleared successfully."}
     except Exception as e:

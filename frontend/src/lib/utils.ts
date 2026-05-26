@@ -7,6 +7,11 @@ export function cn(...inputs: ClassValue[]) {
 
 export function getUserColor(name: string): string {
     if (!name) return '#94a3b8'; // Slate 400
+    
+    // 专属颜色个性化定制
+    if (name === '王铭杨') return '#FF5E9D'; // 很饱满很可爱的粉色 (Strawberry Pink)
+    if (name === '吕杰') return '#FFD700';   // 璀璨华丽的金色 (Gold)
+
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
         hash = name.charCodeAt(i) + ((hash << 5) - hash);

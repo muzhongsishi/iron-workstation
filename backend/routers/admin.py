@@ -216,3 +216,52 @@ def delete_workstation(
     session.delete(ws)
     session.commit()
     return {"success": True, "message": f"Workstation {ws.name} deleted"}
+
+@router.get("/admin/export_backup")
+def export_backup(session: Session = Depends(get_session)):
+    try:
+        users = session.exec(select(User)).all()
+        workstations = session.exec(select(Workstation)).all()
+        reservations = session.exec(select(Reservation)).all()
+        
+        return {
+            "success": True,
+            "users": [u.dict() for u in users],
+            "workstations": [w.dict() for w in workstations],
+            "reservations": [
+                {
+                    "id": r.id,
+                    "user_id": r.user_id,
+                    "workstation_id": r.workstation_id,
+                    "start_date": r.start_date.isoformat() if r.start_date else None,
+                    "end_date": r.end_date.isoformat() if r.end_date else None,
+                    "purpose": r.purpose,
+                    "status": r.status,
+                    "created_at": r.created_at.isoformat() if r.created_at else None,
+                    "last_renewed_at": r.last_renewed_at.isoformat() if r.last_renewed_at else None,
+                }
+                for r in reservations
+            ]
+        }
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+@router.post("/admin/clear_database_online")
+def clear_database_online(session: Session = Depends(get_session)):
+    try:
+        # 清空所有关联的外键及预约数据
+        for r in session.exec(select(Reservation)).all():
+            session.delete(r)
+        
+        # 清空用户数据
+        for u in session.exec(select(User)).all():
+            session.delete(u)
+            
+        # 清空工作站硬件数据
+        for w in session.exec(select(Workstation)).all():
+            session.delete(w)
+            
+        session.commit()
+        return {"success": True, "message": "All online database records cleared successfully."}
+    except Exception as e:
+        return {"success": False, "message": str(e)}

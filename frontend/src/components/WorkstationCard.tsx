@@ -73,8 +73,12 @@ export function WorkstationCard({ workstation, onClick, compact = false, isMine 
                             {workstation.room}
                         </span>
                         {workstation.admin_name && (
-                            <span className="text-[10px] text-blue-300 font-bold flex items-center gap-0.5 truncate" title={workstation.type === 'laptop' ? "责任保管人" : "管理员"}>
-                                <User size={10} /> {workstation.type === 'laptop' ? `保管人: ${workstation.admin_name}` : workstation.admin_name}
+                            <span className="text-[10px] text-blue-300 font-bold flex items-center gap-0.5 truncate" title={workstation.type === 'laptop' ? (isBusy ? "当前使用人" : "责任保管人") : "管理员"}>
+                                <User size={10} /> {
+                                    workstation.type === 'laptop' 
+                                        ? (isBusy && workstation.current_user_name ? `使用人: ${workstation.current_user_name}` : `保管人: ${workstation.admin_name}`) 
+                                        : workstation.admin_name
+                                }
                             </span>
                         )}
                     </div>
